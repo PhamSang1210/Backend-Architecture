@@ -1,6 +1,8 @@
 import shopModel from "../models/shop.model.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import KeyTokenServices from "./keyToken.service.js";
+import AuthUtils from "../auth/authUtils.js";
 
 const ROLES = {
     SHOP: "SHOP",
@@ -38,13 +40,63 @@ class AccessServices {
                     "rsa",
                     {
                         modulusLength: 4096,
+                        publicKeyEncoding: {
+                            type: "pkcs1",
+                            format: "pem",
+                        },
+                        privateKeyEncoding: {
+                            type: "pkcs1",
+                            format: "pem",
+                        },
                     }
                 );
-            }
 
-            return newShop;
+                const publicKeyString = await KeyTokenServices.createKeyToken({
+                    userId: newShop._id,
+                    publicKey,
+                });
+
+                if (!publicKeyString) {
+                    return {
+                        code: "xxxx",
+                        msg: "publicKeyString error !!!!!!!!",
+                    };
+                }
+
+                // convert publicKeyString(Object) => String
+                const publicKeyObject = crypto.createPublicKey(publicKeyString);
+
+                console.log(`PublicKeyString::::: ${publicKeyString}`);
+                console.log(`PublicKeyObject::::: ${publicKeyObject}`);
+
+                //CreateTokenPair
+                const tokens = await AuthUtils.createTokenPair(
+                    {
+                        userId: newShop._id,
+                        email,
+                    },
+                    publicKeyObject,
+                    privateKey
+                );
+
+                return {
+                    code: 201,
+                    metaData: {
+                        shop: newShop,
+                        tokens,
+                    },
+                };
+            }
+            //
+            return {
+                code: 200,
+                metaData: null,
+            };
         } catch (error) {
-            console.log(error);
+            return {
+                code: 301,
+                msg: error,
+            };
         }
     }
 }

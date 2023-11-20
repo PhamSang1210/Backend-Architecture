@@ -1,10 +1,22 @@
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
+import { timed } from "../utils/timezone.util.js";
 
-const DOCUMENT_NAME = "Key";
-const COLLECTION_NAME = "Keys";
+// Constance
+const DOCUMENT_NAME = "key";
+const COLLECTION_NAME = "keys";
 
-const keyTokenSchema = new Schema({
-    user: { type: Schema.Types.String, require: true, ref: "shop" },
-});
+const keyTokenSchema = new Schema(
+    {
+        user: { type: Schema.Types.ObjectId, require: true, ref: "shop" },
+        publicKey: { type: Schema.Types.String, required: true },
+        refreshToken: { type: Schema.Types.Array, default: [] },
+        createdAt: timed.createdAt,
+        updatedAt: timed.updatedAt,
+    },
+    {
+        collection: COLLECTION_NAME,
+        // versionKey:false
+    }
+);
 
 export default model(DOCUMENT_NAME, keyTokenSchema);

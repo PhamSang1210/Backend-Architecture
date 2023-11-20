@@ -1,5 +1,6 @@
 import { Schema, model, Types } from "mongoose";
-import { timeOrigin } from "../utils/timezone.util.js";
+// import { timeOrigin } from "../utils/timezone.util.js";
+import { timed } from "../utils/timezone.util.js";
 
 const DOCUMENT_NAME = "shop";
 const COLLECTION_NAME = "shops";
@@ -12,8 +13,9 @@ const shopSchema = new Schema(
         status: { type: Schema.Types.String, enum: ["active", "inactive"] },
         verify: { type: Schema.Types.Boolean, default: false },
         roles: { type: Schema.Types.Array, default: [] },
-        createdAt: { type: Schema.Types.String, default: timeOrigin },
-        updatedAt: { type: Schema.Types.String, default: timeOrigin },
+        createdAt: timed.createdAt,
+        updatedAt: timed.updatedAt,
+        // updatedAt: { type: Schema.Types.String, default: timeOrigin },
     },
     {
         collection: COLLECTION_NAME,
